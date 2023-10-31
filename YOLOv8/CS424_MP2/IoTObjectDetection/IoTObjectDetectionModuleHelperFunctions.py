@@ -12,13 +12,13 @@ from PIL import Image
 
 
 def visualize_history_file(history, Text_colors=(255,255,255)):
-    """Visualize scheduling history from dictionary.
+    """Visualize processing history from dictionary.
 
-    Draw the scheduling order of bounding boxes in the image_out_path.
+    Draw the processing order of bounding boxes in the image_out_path.
     Blue for box that meet deadline and red for box that missed.
 
     Args:
-        history: A dictionary of scheduling history read from json file. 
+        history: A dictionary of processing history read from json file. 
     """
     for order in history:
         entry = history[order]
@@ -59,12 +59,12 @@ def visualize_history_file(history, Text_colors=(255,255,255)):
 def get_group_avg_response_time(history):
     """Calculate average response time for each depth group.
 
-    Use the scheduling history to calculate the average response time for 
+    Use the processing history to calculate the average response time for 
     each depth group. Each group is composed of objects that are in a 10m
     range, such as 0-10m, 10-20m, etc..
 
     Args:
-        history: A dictionary of scheduling history read from json file. 
+        history: A dictionary of processing history read from json file. 
     
     Returns:
         A list of response time for each depth group. 

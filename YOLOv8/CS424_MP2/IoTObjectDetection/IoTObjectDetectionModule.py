@@ -11,7 +11,7 @@ import shutil
 
             
 class iot_object_detection_module:
-    """This class simulates a IoT device's object detection module. The camera() function uses Waymo Open dataset to simulate period frame interval of a camera. While, the IoT devices uses procesor() function to run object detection on frames produced by the camera 
+    """This class simulates a IoT device's object detection module. The camera() function uses Waymo Open dataset to simulate periodic frame arrival from a camera. While, the IoT devices uses procesor() function to run object detection on frames produced by the camera wewe
 
     Attributes:
         frame_period: The period to obtain a new frame. 
@@ -20,7 +20,7 @@ class iot_object_detection_module:
         max_frame_number: the number of frame to be processed. 
         run_queue: a priority queue that sorts task by their priority.
                 A lower number means higher priority. 
-        history: scheduling history. 
+        history: processing history. 
         task_finish_count: number of tasks that have finished. 
         yolo: YoloV8 model. Used for object classification.
     """
@@ -86,9 +86,9 @@ class iot_object_detection_module:
 
                 self.history.append(top_task)
             
-        # save scheduling history to file
+        # save processing history to file
         self.save_history()
-        print("Scheduling history saved.")
+        print("Processing history saved.")
 
     def get_frame(self, frame_number):
         """Return and Image() object with the specified frame number."""
@@ -137,7 +137,7 @@ class iot_object_detection_module:
 
 
     def print_history(self):
-        """Print out the scheduling history of the scheduler."""
+        """Print out the processing history of the detection module."""
         dash = '-' * 70
         print(dash)
         print("history:")
@@ -153,20 +153,20 @@ class iot_object_detection_module:
     
 
     def save_history(self):
-        """Save the scheduling history as a json file."""
+        """Save the processing history as a json file."""
         d = {}
         i = 1
         for entry in self.history:
             d[i] = entry.__dict__
             i = i + 1
         
-        with open('scheduling_history.json', 'w') as outfile:
+        with open('camera_frame_processing_history.json', 'w') as outfile:
             json.dump(d, outfile, ensure_ascii=False, indent=4)
 
     def visualize_history(self, Text_colors=(255,255,255)):
-        """Visualize scheduling order.
+        """Visualize processing order.
 
-        Draw the scheduling order of bounding boxes in the image_out_path.
+        Draw the processing order of bounding boxes in the image_out_path.
         Blue for box that meet deadline and red for box that missed.      
         """
         order = 1
