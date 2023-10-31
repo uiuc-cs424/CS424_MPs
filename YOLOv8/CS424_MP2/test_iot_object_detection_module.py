@@ -3,15 +3,15 @@
 
 import time
 import threading
-from scheduling.Scheduler import *
+from IoTObjectDetection.IoTObjectDetectionModule import *
 
 
 start_time = time.time()
 
-scheduler = Scheduler()
+iot_object_detection_module = iot_object_detection_module()
 
-camera_thread = threading.Thread(target=scheduler.camera)
-processor_thread = threading.Thread(target=scheduler.processor)
+camera_thread = threading.Thread(target=iot_object_detection_module.camera)
+processor_thread = threading.Thread(target=iot_object_detection_module.processor)
 
 camera_thread.start()
 processor_thread.start()
@@ -19,8 +19,8 @@ processor_thread.start()
 camera_thread.join()
 processor_thread.join()
     
-scheduler.print_history()
-scheduler.visualize_history()
+iot_object_detection_module.print_history()
+iot_object_detection_module.visualize_history()
 
 end_time = time.time()
 

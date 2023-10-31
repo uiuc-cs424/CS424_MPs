@@ -1,7 +1,7 @@
 # UIUC CS 424 Machine Problems 
 # Designed and developed by Md Iftekharul Islam Sakib, Ph.D. Student, CS, UIUC (miisakib@gmail.com) under the supervision of Prof. Tarek Abdelzaher, CS, UIUC (zaher@illinois.edu)
 
-from scheduling.misc import *
+from IoTObjectDetection.IoTObjectDetectionModuleHelperFunctions import *
 
 class Image:
     """ Image class.

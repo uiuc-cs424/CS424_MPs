@@ -2,7 +2,7 @@
 # Designed and developed by Md Iftekharul Islam Sakib, Ph.D. Student, CS, UIUC (miisakib@gmail.com) under the supervision of Prof. Tarek Abdelzaher, CS, UIUC (zaher@illinois.edu)
 
 from queue import PriorityQueue
-from scheduling.misc import *
+from IoTObjectDetection.IoTObjectDetectionModuleHelperFunctions import *
 from process_frame import *
 import time
 import threading
@@ -10,14 +10,10 @@ import os
 import shutil
 
             
-class Scheduler:
-    """Scheduler to process image frames.
-
-    This scheduler simulates how a image stream is processed. 
-    The frames information and Yolo model is also stored in this class.
+class iot_object_detection_module:
+    """This class simulates a IoT device's object detection module. The camera() function uses Waymo Open dataset to simulate period frame interval of a camera. While, the IoT devices uses procesor() function to run object detection on frames produced by the camera 
 
     Attributes:
-        time: the simulated timer.
         frame_period: The period to obtain a new frame. 
         image_directory: The path to the image directory. Default is "../dataset/".
         image_list: a list containing all the images to be processed. 
@@ -26,7 +22,7 @@ class Scheduler:
                 A lower number means higher priority. 
         history: scheduling history. 
         task_finish_count: number of tasks that have finished. 
-        yolo: YoloV3 model. Used for object classification.
+        yolo: YoloV8 model. Used for object classification.
     """
 
     def __init__(self, image_directory = "../../dataset/", frame_period = .1, finish_counter=300):
