@@ -7,7 +7,7 @@ from PIL import Image
 
 imageReadRelativeDir = "../../dataset/"
 imageName = "frame_camera_0.png"
-imageSaveRelativeDir = "../../dataset/Out/"
+imageSaveRelativeDir = "../../dataset/object_detection_history/"
 
 inferenceModel = YOLO("yolov8n.pt")
 

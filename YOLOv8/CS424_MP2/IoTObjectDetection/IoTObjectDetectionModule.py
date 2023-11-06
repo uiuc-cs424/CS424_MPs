@@ -25,11 +25,12 @@ class iot_object_detection_module:
         yolo: YoloV8 model. Used for object classification.
     """
 
-    def __init__(self, image_directory = "../../dataset/", frame_period = .1, finish_counter=300):
+    def __init__(self, image_directory = "../../dataset/", frame_period = .1, finish_counter=20):
         self.frame_period = frame_period
         self.frame_number = 0
         self.image_directory = image_directory
-        self.image_output_directory = image_directory+"out/"
+        self.image_output_directory = image_directory+"object_detection_history/"
+        self.processing_order_output_directory = image_directory+"object_processing_order_history/"
         self.image_list = extract_png_files(image_directory)
         self.max_frame_number = len(self.image_list)
         self.run_queue = PriorityQueue()
@@ -43,7 +44,11 @@ class iot_object_detection_module:
         
         if os.path.isdir(self.image_output_directory):
             shutil.rmtree(self.image_output_directory)
+            
+        if os.path.isdir(self.processing_order_output_directory):
+            shutil.rmtree(self.processing_order_output_directory)
 
+            
     def camera(self):
         """
         Camera functioning simulator loop.
@@ -63,7 +68,7 @@ class iot_object_detection_module:
         while not self.run_queue.empty() and self.finish_counter >=0:
             if self.run_queue.empty():
                 self.finish_counter -= 1
-                time.sleep(.01)
+                time.sleep(self.frame_period)
                 
             else:
                 self.finish_counter = self.finish_counter_initial
@@ -88,7 +93,7 @@ class iot_object_detection_module:
             
         # save processing history to file
         self.save_history()
-        print("Processing history saved.")
+        print("*** Processing History Saved. ***")
 
     def get_frame(self, frame_number):
         """Return and Image() object with the specified frame number."""
@@ -119,6 +124,7 @@ class iot_object_detection_module:
             frame_number: The number of frame in the image list.
         """
         frame = self.get_frame(frame_number)
+
         if frame:
             task_set = process_frame(frame)
             self.enqueue_task(task_set)
@@ -138,9 +144,9 @@ class iot_object_detection_module:
 
     def print_history(self):
         """Print out the processing history of the detection module."""
-        dash = '-' * 70
+        dash = '-' * 148
         print(dash)
-        print("history:")
+        print("### Processing Order History: ")
         print('{:<7s}{:<21s}{:>25s}{:>8s}{:>10s}{:>15s}{:>12s}{:>15s}{:>15s}{:>10s}{:>10s}'.format(
             "count", "task_image", "img_coordinates", "depth", "priority",
             "enqueue_time", "exec_time", "response_time", "proc_end_time", "deadline", "missed"))
@@ -160,7 +166,10 @@ class iot_object_detection_module:
             d[i] = entry.__dict__
             i = i + 1
         
-        with open('camera_frame_processing_history.json', 'w') as outfile:
+        if not os.path.exists(self.processing_order_output_directory):
+            os.makedirs(self.processing_order_output_directory)
+
+        with open(self.processing_order_output_directory+'camera_frame_processing_history.json', 'w') as outfile:
             json.dump(d, outfile, ensure_ascii=False, indent=4)
 
     def visualize_history(self, Text_colors=(255,255,255)):
@@ -169,17 +178,26 @@ class iot_object_detection_module:
         Draw the processing order of bounding boxes in the image_out_path.
         Blue for box that meet deadline and red for box that missed.      
         """
+        history_visualization_start_time =  time.time()-self.start_time
+        print("History visualization started at the time: ", history_visualization_start_time, "s")
         order = 1
         for task in self.history:
-            if os.path.exists(task.image_out_path):
-                image = cv2.imread(task.image_out_path)
+            if os.path.exists(task.processing_order_out_path):
+                image = cv2.imread(task.processing_order_out_path)
             else:
                 image = cv2.imread(task.image_path)
             image_h, image_w, _ = image.shape
 
-            bbox_color = (0,0,255) if (task.missed) else (255,0,0)
+            if (task.missed):
+                bbox_color = (0,0,255) 
+            else:
+                bbox_color = (255,0,0)
+
             bbox_thick = int(0.6 * (image_h + image_w) / 1000)
-            if bbox_thick < 1: bbox_thick = 1
+
+            if bbox_thick < 1: 
+                bbox_thick = 1
+
             fontScale = 0.75 * bbox_thick
             coor = task.coord
             (x1, y1), (x2, y2) = (coor[0], coor[1]), (coor[2], coor[3])
@@ -197,8 +215,16 @@ class iot_object_detection_module:
             cv2.putText(image, order_text, (x1, y1-4), cv2.FONT_HERSHEY_COMPLEX_SMALL,
                         fontScale, Text_colors, bbox_thick, lineType=cv2.LINE_AA)
             
-            cv2.imwrite(task.image_out_path, image)
+        
+            if not os.path.exists(self.processing_order_output_directory):
+                os.makedirs(self.processing_order_output_directory)
+            
+            cv2.imwrite(task.processing_order_out_path, image)
 
             order = order + 1
+        
+        history_visualization_end_time =  time.time()-self.start_time
+        print("History visualization completed at the time: ", history_visualization_end_time, "s")
+        print("History visualization took a total time of ", history_visualization_end_time-history_visualization_start_time, "s")
 
 

@@ -11,7 +11,7 @@ from ultralytics import YOLO
 from PIL import Image
 
 
-def visualize_history_file(history, Text_colors=(255,255,255)):
+def visualize_history_file(history, start_time=time.time(), Text_colors=(255,255,255)):
     """Visualize processing history from dictionary.
 
     Draw the processing order of bounding boxes in the image_out_path.
@@ -20,17 +20,29 @@ def visualize_history_file(history, Text_colors=(255,255,255)):
     Args:
         history: A dictionary of processing history read from json file. 
     """
+    history_visualization_start_time =  time.time()-start_time
+    print("History visualization started at the time: ", history_visualization_start_time, "s")
+    
     for order in history:
         entry = history[order]
-        if os.path.exists(entry["image_out_path"]):
-            image = cv2.imread(entry["image_out_path"])
+
+        if os.path.exists(entry["processing_order_out_path"]):
+            image = cv2.imread(entry["processing_order_out_path"])
         else:
             image = cv2.imread(entry["image_path"])
+            
         image_h, image_w, _ = image.shape
 
-        bbox_color = (0,0,255) if (entry["missed"]) else (255,0,0)
+        if (entry["missed"]):
+            bbox_color = (0,0,255)  
+        else:
+            bbox_color = (255,0,0)
+
         bbox_thick = int(0.6 * (image_h + image_w) / 1000)
-        if bbox_thick < 1: bbox_thick = 1
+
+        if bbox_thick < 1: 
+            bbox_thick = 1
+
         fontScale = 0.75 * bbox_thick
         coor = entry["coord"]
         (x1, y1), (x2, y2) = (coor[0], coor[1]), (coor[2], coor[3])
@@ -48,12 +60,16 @@ def visualize_history_file(history, Text_colors=(255,255,255)):
         cv2.putText(image, order_text, (x1, y1-4), cv2.FONT_HERSHEY_COMPLEX_SMALL,
                     fontScale, Text_colors, bbox_thick, lineType=cv2.LINE_AA)
         
-        i = entry["image_out_path"].rfind('/')
-        output_directory = entry["image_out_path"][:i]
+        i = entry["processing_order_out_path"].rfind('/')
+        output_directory = entry["processing_order_out_path"][:i]
         if not os.path.exists(output_directory):
             os.makedirs(output_directory)
                 
-        cv2.imwrite(entry["image_out_path"], image)
+        cv2.imwrite(entry["processing_order_out_path"], image)
+    
+    history_visualization_end_time =  time.time()-start_time
+    print("History visualization completed at the time: ", history_visualization_end_time, "s")
+    print("History visualization took a total time of ", history_visualization_end_time-history_visualization_start_time, "s")
 
 
 def get_group_avg_response_time(history):
@@ -106,8 +122,10 @@ def detect_images(inference_model, image_path, box=None, output_path="", id=0, w
         show: whether to show the image for display.
     """
     original_image = cv2.imread(image_path)
+
     if box:
         original_image = original_image[box[1]:box[3], box[0]:box[2]]
+
     # original_image      = cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB)
     original_image_size = original_image.shape[:2]
 
@@ -126,8 +144,15 @@ def detect_images(inference_model, image_path, box=None, output_path="", id=0, w
         
         if not os.path.exists(output_directory):
             os.makedirs(output_directory)
+        
+        if id:
+            prediction_result_image.save(output_path)
+        else:
+            files_with_same_prefix_in_output_directory = count_files_with_same_prefix(output_path)
+            i = output_path.rfind('.')
+            output_path = output_path[:i] + '[' + str(files_with_same_prefix_in_output_directory+1) + ']' +output_path[i:] 
 
-        prediction_result_image.save(output_path)
+            prediction_result_image.save(output_path)
 
     if show:
         # Show the image
@@ -218,3 +243,17 @@ def crop_cluster_box(frame, cluster_boxes_data):
 def list_to_str(l):
     """Function convert a coordinate list to string for printing"""
     return '(' + str(l[0]) + ',' + str(l[1]) + '), (' + str(l[2]) + ',' + str(l[3]) + ')'
+
+def count_files_with_same_prefix(given_file_path):
+    i = given_file_path.rfind('/')
+    given_directory_path = given_file_path[:i+1]
+    given_file_name_with_ext = given_file_path[i+1:]
+    j = given_file_name_with_ext.rfind('.')
+    given_file_name = given_file_name_with_ext[:j]
+    given_file_ext = given_file_name_with_ext[j+1:]
+
+    no_of_files_with_same_prefix_found=0
+    for file in os.listdir(given_directory_path):
+        if file.endswith(given_file_ext) and file.startswith(given_file_name+"["):
+            no_of_files_with_same_prefix_found = no_of_files_with_same_prefix_found + 1
+    return no_of_files_with_same_prefix_found

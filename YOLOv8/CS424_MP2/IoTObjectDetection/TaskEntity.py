@@ -52,7 +52,7 @@ class TaskEntity:
         self.priority = priority
         self.depth = depth
         self.bbox_id = bbox_id
-        self.set_image_out_path(image_path)
+        self.set_image_out_paths(image_path)
         self.order = 0
         self.exec_time = 0.0
 #        self.remain_time = 0
@@ -71,17 +71,18 @@ class TaskEntity:
             self.img_width = 1920
             self.img_height = 1280
     
-    def set_image_out_path(self, image_path):
-        """Set the image output path."""
+    def set_image_out_paths(self, image_path):
+        """Set the object detection output & processing order output path."""
         i = image_path.rfind('/')
-        self.image_out_path = image_path[:i+1] + "out/" + image_path[i+1:]
+        self.image_out_path = image_path[:i+1] + "object_detection_history/" + image_path[i+1:]
+        self.processing_order_out_path = image_path[:i+1] + "object_processing_order_history/" + image_path[i+1:]
         self.image_name = image_path[i+1:]
 
     def print(self):
         """Return a string showing important task information for printing."""
         return '{:<21s}{:>25s}{:>8.3f}{:>10d}{:>12.3f} {:>12.3f} {:>12.3f}   {:>12.3f} {:>12.3f}{:>10d}'.format(
                 self.image_name, list_to_str(self.coord), self.depth, self.priority, self.enqueue_time,
-                self.exec_time, self.response_time, self.proc_end_time, self.deadline, self.missed)
+                self.exec_time, self.response_time, self.proc_end_time, self.enqueue_time+self.deadline, self.missed)
 
     """
     The following functions are used to implement comparison between TaskEntity.

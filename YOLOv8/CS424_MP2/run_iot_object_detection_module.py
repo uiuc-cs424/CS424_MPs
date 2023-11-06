@@ -24,11 +24,11 @@ iot_object_detection_module.visualize_history()
 
 end_time = time.time()
 
-print("Elapsed time: %f s" % (end_time - start_time))
+print("Elapsed time: %fs" % (end_time - start_time))
 
 
 # # example for using visualize_history_file()
-# history = read_json_file("scheduling_history.json")
+# history = read_json_file("../../dataset/object_processing_order_history/camera_frame_processing_history.json")
 # visualize_history_file(history)
 # # calculate group average response time from history file
 # group_response_time = get_group_avg_response_time(history)
