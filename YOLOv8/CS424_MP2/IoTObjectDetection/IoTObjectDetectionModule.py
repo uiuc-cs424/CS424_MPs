@@ -175,7 +175,7 @@ class iot_object_detection_module:
     def visualize_history(self, Text_colors=(255,255,255)):
         """Visualize processing order.
 
-        Draw the processing order of bounding boxes in the image_out_path.
+        Draw the processing order of bounding boxes in the processing_order_output_directory.
         Blue for box that meet deadline and red for box that missed.      
         """
         history_visualization_start_time =  time.time()-self.start_time
