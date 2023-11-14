@@ -14,7 +14,7 @@ from PIL import Image
 def visualize_history_file(history, start_time=time.time(), Text_colors=(255,255,255)):
     """Visualize processing history from dictionary.
 
-    Draw the processing order of bounding boxes in the image_out_path.
+    Draw the processing order of bounding boxes in the processing_order_output_directory.
     Blue for box that meet deadline and red for box that missed.
 
     Args:
