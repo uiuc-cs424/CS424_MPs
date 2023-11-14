@@ -28,11 +28,6 @@ def process_frame(frame):
     
     # student's code here
     
-    cluster_boxes_data = get_bbox_info(frame, box_info)
-    tasks = []
 
-    for i in range(len(cluster_boxes_data)):
-      tasks.append(TaskEntity(frame.path, coord=cluster_boxes_data[i][:4], priority=int(cluster_boxes_data[i][4]*1000), depth=cluster_boxes_data[i][4]))
 
-    return tasks
     
